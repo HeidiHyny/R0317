@@ -9,9 +9,25 @@ import java.util.Scanner;
 import java.util.Map.Entry;
 
 public class KT3_Sanakirja2 {
-// Tallennetaan Auto-olio sarjallistettuna tiedostoon
+// Tallennetaan olio sarjallistettuna tiedostoon
 
-	public static void main(String[] args) throws Exception  { // eli ei k‰sitell‰ poikkeuksia
+	static  HashMap<String, String> deserializeFromXML(HashMap<String, String> parit) throws Exception {
+		FileInputStream fis = new FileInputStream("Kirjakirjanen.xml");
+		XMLDecoder decoder = new XMLDecoder(fis);
+		HashMap<String, String> decodedParit = (HashMap<String, String>) decoder.readObject();
+		decoder.close();
+		fis.close();
+return decodedParit;
+}
+	private static void serializeToXML(HashMap<String, String> parit) throws Exception  {
+		FileOutputStream fos = new FileOutputStream("Kirjakirjanen.xml");
+		XMLEncoder encoder = new XMLEncoder(fos);
+		encoder.writeObject(parit);
+		encoder.close();
+		fos.close();
+}
+	
+	public static void main(String[] args) throws Exception  { // eli ei k√§sitell√§ poikkeuksia
 
 		// Tiedostojen kirjoittamista varten
 		FileOutputStream apuTied = new FileOutputStream("SanaparitTallessa.oma");
@@ -20,90 +36,69 @@ public class KT3_Sanakirja2 {
 		// Tiedostojen lukemista varten
 		FileInputStream fis = new FileInputStream("SanaparitTallessa.oma");
 		ObjectInputStream luettuData = new ObjectInputStream(fis);
-		
-		//XML tiedostoja varten
-		FileOutputStream tiedosto = new FileOutputStream("Kirjakirjanen.xml");
-		XMLEncoder enc = new XMLEncoder(new BufferedOutputStream(tiedosto));
 
-		// Luodaan uusi olio
-		Sanoja a = new Sanoja();
+		
+		// Luodaan uusi hashmap sanapareilla
+		HashMap<String, String> parit = new HashMap<>(); {
 
-		//Luodaan hahsmap ja asetetaan olion taulukoiden sis‰ltˆ sinne
-		HashMap<String, String> parit = new HashMap<>();
-		for (int i = 0; i < a.kaupungit.length; i++) {
-			parit.put(a.avaimet[i], a.kaupungit[i]);
+			String[] suomi = { "kissa", "koira", "hevonen", "auto", "vene" };
+			String[] englanti = { "cat", "dog", "horse", "car", "boat" };
+
+			for (int i = 0; i < suomi.length; i++) {
+				parit.put(suomi[i], englanti[i]);
+			}		
 		}
+
 		
-		//Muodostetaan Iterator joka j‰rjestelee taulukon itr nimiseen muuttujaan
-		Iterator<Entry<String, String>> itr = parit.entrySet().iterator(); 
-		//Tulostetaan sanat hashmapista
-		System.out.print("Sanakirjan sis‰ltˆ: {");
-		while (itr.hasNext()) {
-			HashMap.Entry<String,String> alkio = (HashMap.Entry<String,String>) itr.next();
-			System.out.print( alkio.getKey() + " = " + alkio.getValue() + ", ");
-		}
-		System.out.print("}");
-		System.out.println();
-		
-		//Kysyt‰‰n k‰ytt‰j‰lt‰ tulostettava avainpari ja tulostetaan se
+		//Kysyt√§√§n k√§ytt√§j√§lt√§ tulostettava avainpari ja tulostetaan se
 		//tuodaan mukaan skanneriluokka
 		Scanner lukija = new Scanner(System.in);
+		
 		//Luodaan tarvittavat muuttujat
-		String sana = null;
-		String alku = null;
-		String kaannos = null;
 		
-		//Kysyt‰‰n k‰ytt‰j‰lt‰ tulostettava avainpari ja tulostetaan se
-		do  {
-		System.out.print("Mink‰ sanan k‰‰nnˆksen haluat tiet‰‰? (tyhj‰ sana lopettaa) ");
-		sana = lukija.nextLine();
-		System.out.println("Sanan \"" + sana + "\" k‰‰nnˆs on \"" + parit.get(sana) + "\"");
-	} 
-		while (!sana.equals("")); {
-			System.out.println("Ohjelma lopetetaan, kiitos k‰ynnist‰!");
+		//Kysyt√§√§n k√§ytt√§j√§lt√§ tulostettava avainpari ja tulostetaan se
+		System.out.println(parit);
+		
+		while (true)  {
+		System.out.print("Mink√§ sanan k√§√§nn√∂ksen haluat tiet√§√§? (tyhj√§ sana lopettaa) ");
+		String sana = lukija.nextLine();
+		if (!sana.isEmpty()) {
+		System.out.println("Sanan \"" + sana + "\" k√§√§nn√∂s on \"" + parit.get(sana) + "\" ");
 		}
-		//Kysyt‰‰n k‰ytt‰j‰lt‰ uudet arvot avainpariksi
-		do  {
-			System.out.println("Sana alkukielell‰? (tyhj‰ lopettaa) ");
-			alku = lukija.nextLine();
-			if (alku.equals("")){
-			
-			//Loppusanoman printtaus
-			System.out.println("Ohjelma lopetetaan, kiitos k‰ynnist‰!");
-			}
-			else {
-			System.out.println("Sana k‰‰nnettyn‰? (tyhj‰ lopettaa) ");
-			kaannos = lukija.nextLine();
-			parit.put(alku, kaannos);
-			
-			System.out.println("Sanan \"" + alku + "\" k‰‰nnˆs on \"" + parit.get(alku) + "\"");
-			}
-		}
-			while (!alku.equals("")); {
-			
-			
-			}
+		if (sana.isEmpty()) {
+			System.out.println("Ohjelma lopetetaan, kiitos k√§ynnist√§!");
+			break;
+		}}
+	
 
-			//tallennetaan sanaparit tiedostoihin
-			enc.writeObject(parit+"");
-			talteen.writeObject(parit);
-			
-			//suljetaan myˆs ohjelman k‰‰nt‰minen tiedostoon jos tyhj‰
-			enc.close();
-			talteen.flush();
-			apuTied.close();
-
-		// Luetaan oliot takaisin levylt‰ EI TOIMI
-
-		Sanoja uusi =  (Sanoja) luettuData.readObject();
-		Sanoja toinenUusi = (Sanoja) luettuData.readObject();
-
-		//Sanaparit2 c = deserializeFromXML();
-		
-
-		// Tulostetaan ne
-		System.out.println(uusi);
-		System.out.println(toinenUusi);
-		
+while (true) {
+	System.out.println("Sana alkukielell√§? (tyhj√§ lopettaa) ");
+	String alku = lukija.nextLine();
+	if (alku.isEmpty()) {
+		System.out.println("Ohjelma lopetetaan, kiitos k√§ynnist√§!");
+		break;
 	}
+	if (!alku.isEmpty()) {
+		System.out.println("Sana k√§√§nnettyn√§? (tyhj√§ lopettaa) ");
+		String kaannos = lukija.nextLine();
+		
+		parit.put(alku, kaannos);
+		serializeToXML(parit);
+		
+		System.out.println("Sanan \"" + alku + "\" k√§√§nn√∂s on \"" + parit.get(alku) + "\"");
+	}
+	
 }
+
+parit = deserializeFromXML(parit);
+
+System.out.println("\nSanat sanakirjasta:\n");
+
+Iterator<Entry<String, String>> it = parit.entrySet().iterator();
+while (it.hasNext()) {
+	HashMap.Entry<String, String> alkio = (HashMap.Entry<String, String>) it.next();
+	System.out.println(alkio.getKey() + " = " + alkio.getValue());
+}	
+					
+		
+	}}
